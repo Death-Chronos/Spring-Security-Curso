@@ -1,4 +1,4 @@
-package com.security.couponservice.models;
+package com.security.productservice.models;
 
 import java.util.Set;
 
@@ -46,5 +46,11 @@ public class User {
     public String getPassword() {
         return password;
     }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    
 
 }
