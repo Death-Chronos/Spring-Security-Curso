@@ -28,45 +28,29 @@ public class WebSecurityConfig {
 		return new BCryptPasswordEncoder();
 	}
 
-	//Esses dois métodos abaixo servem para fazer a autenticação customizada. Lembre se de tira-las caso vá usar a padrão(Ollhe a aula 55 do curso, caso não saiba como, um cometário dá um exemplo de como fazer)
-	@Bean
-	SecurityContextRepository securityContextRepository() {
-		return new DelegatingSecurityContextRepository(
-				new RequestAttributeSecurityContextRepository(), 
-				new HttpSessionSecurityContextRepository()
-				);
-	}
-
-	@Bean
-	AuthenticationManager authManager() {
-		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-
-		provider.setUserDetailsService(userDetailsService);
-		provider.setPasswordEncoder(passwordEncoder());
-
-		return new ProviderManager(provider);
-	}
-
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
+		http.formLogin(login -> login
+		.loginPage("/login")
+		.defaultSuccessUrl("/index", true)
+		.failureForwardUrl("/login?error=true")
+		.permitAll());
+
 		http.authorizeHttpRequests(authorize -> authorize
-			.requestMatchers(HttpMethod.GET, "/couponapi/coupons/{code:^[A-Z]*$}", "showGetCoupon", "/getCoupon","index")
+			.requestMatchers(HttpMethod.GET, "/couponapi/coupons/{code:^[A-Z]*$}", "showGetCoupon", "/getCoupon","/index")
 				.hasAnyRole("USER", "ADMIN")
 			.requestMatchers(HttpMethod.GET, "/showCreateCoupon", "/createCoupon", "/createResponse")
 				.hasRole("ADMIN")
 			.requestMatchers(HttpMethod.POST, "/couponapi/coupons", "/saveCoupon", "/saveCoupon")
 				.hasRole("ADMIN")
-			.requestMatchers(HttpMethod.POST, "/getCoupon")
+			.requestMatchers(HttpMethod.POST, "/getCoupon","/login")
 				.hasAnyRole("USER", "ADMIN")
-			.requestMatchers(HttpMethod.GET, "/","/login")
-				.permitAll()
-			.requestMatchers(HttpMethod.POST, "/login")
+			.requestMatchers(HttpMethod.GET, "/login")
 				.permitAll());
 			
-		http.logout(logout -> logout.logoutSuccessUrl("/"));		
+		http.logout(logout -> logout.logoutSuccessUrl("/login").permitAll());		
 
-		http.securityContext(security -> security.requireExplicitSave(true));
 		http.csrf(csrf -> csrf.disable());
 
 		return http.build();
