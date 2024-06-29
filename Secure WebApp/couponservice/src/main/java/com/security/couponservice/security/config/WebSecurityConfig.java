@@ -29,6 +29,7 @@ public class WebSecurityConfig {
 	}
 
 	//Esses dois métodos abaixo servem para fazer a autenticação customizada. Lembre se de tira-las caso vá usar a padrão(Ollhe a aula 55 do curso, caso não saiba como, um cometário dá um exemplo de como fazer)
+	//Atualização, fiz uma branch que já faz isso
 	@Bean
 	SecurityContextRepository securityContextRepository() {
 		return new DelegatingSecurityContextRepository(
@@ -59,9 +60,9 @@ public class WebSecurityConfig {
 				.hasRole("ADMIN")
 			.requestMatchers(HttpMethod.POST, "/getCoupon")
 				.hasAnyRole("USER", "ADMIN")
-			.requestMatchers(HttpMethod.GET, "/","/login")
+			.requestMatchers(HttpMethod.GET, "/","/login", "/showReg", "/registerUser")
 				.permitAll()
-			.requestMatchers(HttpMethod.POST, "/login")
+			.requestMatchers(HttpMethod.POST,"/login", "/registerUser")
 				.permitAll());
 			
 		http.logout(logout -> logout.logoutSuccessUrl("/"));		
