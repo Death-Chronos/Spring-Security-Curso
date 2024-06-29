@@ -12,9 +12,6 @@ import com.security.couponservice.models.Role;
 import com.security.couponservice.models.User;
 import com.security.couponservice.repositories.UserRepository;
 
-
-
-
 @Controller
 public class UserController {
 
