@@ -4,18 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.context.DelegatingSecurityContextRepository;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
 
 @Configuration
 public class WebSecurityConfig {
@@ -34,8 +26,8 @@ public class WebSecurityConfig {
 		http.formLogin(login -> login
 		.loginPage("/login")
 		.defaultSuccessUrl("/index", true)
-		.failureForwardUrl("/login?error=true")
 		.permitAll());
+
 
 		http.authorizeHttpRequests(authorize -> authorize
 			.requestMatchers(HttpMethod.GET, "/couponapi/coupons/{code:^[A-Z]*$}", "showGetCoupon", "/getCoupon","/index")
@@ -46,7 +38,9 @@ public class WebSecurityConfig {
 				.hasRole("ADMIN")
 			.requestMatchers(HttpMethod.POST, "/getCoupon","/login")
 				.hasAnyRole("USER", "ADMIN")
-			.requestMatchers(HttpMethod.GET, "/login")
+			.requestMatchers(HttpMethod.GET, "/login", "/showReg")
+				.permitAll()
+			.requestMatchers(HttpMethod.POST, "/register")
 				.permitAll());
 			
 		http.logout(logout -> logout.logoutSuccessUrl("/login").permitAll());		
