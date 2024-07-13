@@ -9,23 +9,26 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.DelegatingSecurityContextRepository;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import com.security.couponservice.security.UserDetailsServiceImpl;
+
 @Configuration
+@EnableMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig {
 
 	@Autowired
-	UserDetailsService userDetailsService;
+	UserDetailsServiceImpl userDetailsService;
 
 	@Bean
 	BCryptPasswordEncoder passwordEncoder() {
@@ -67,31 +70,32 @@ public class WebSecurityConfig {
 
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http.httpBasic(Customizer.withDefaults());
 
-		http.authorizeHttpRequests(authorize -> authorize
-				.requestMatchers(HttpMethod.GET, "/couponapi/coupons/{code:^[A-Z]*$}", "showGetCoupon", "/getCoupon","index")
-					.permitAll()
-				.requestMatchers(HttpMethod.GET, "/showCreateCoupon", "/createCoupon", "/createResponse")
+	 	http.authorizeHttpRequests(authorize -> authorize
+	 		.requestMatchers(HttpMethod.GET, "/couponapi/coupons/{code:^[A-Z]*$}", "showGetCoupon", "/getCoupon","index")
+	 			.permitAll()
+	 		.requestMatchers(HttpMethod.GET, "/showCreateCoupon", "/createCoupon", "/createResponse")
 					.hasRole("ADMIN")
-				.requestMatchers(HttpMethod.POST, "/couponapi/coupons", "/saveCoupon")
-					.hasRole("ADMIN")
-				.requestMatchers(HttpMethod.POST, "/getCoupon")
-					.hasAnyRole("USER", "ADMIN")
-				.requestMatchers(HttpMethod.GET, "/", "/login", "/showReg", "/registerUser")
-					.permitAll()
-				.requestMatchers(HttpMethod.POST, "/login", "/registerUser")
-					.permitAll());
+	 		.requestMatchers(HttpMethod.POST, "/couponapi/coupons", "/saveCoupon")
+	 			.hasRole("ADMIN")
+	 		.requestMatchers(HttpMethod.POST, "/getCoupon")
+	 			.hasAnyRole("USER", "ADMIN")
+	 		.requestMatchers(HttpMethod.GET, "/", "/login", "/showReg", "/registerUser")
+	 			.permitAll()
+	 		.requestMatchers(HttpMethod.POST, "/login", "/registerUser")
+	 			.permitAll());
 
 		//Método de fazer um CORS(permitir a um outro serviço usufluir do nosso quando temos segurança) no Filter Chain
-		http.cors(cors->{
-			CorsConfigurationSource source = request ->{
-				CorsConfiguration configuration = new CorsConfiguration();
-				configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-				configuration.setAllowedMethods(List.of("GET"));
-				return configuration;
-			};
-			cors.configurationSource(source);
-		});
+		// http.cors(cors->{
+		// 	CorsConfigurationSource source = request ->{
+		// 		CorsConfiguration configuration = new CorsConfiguration();
+		// 		configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+		// 		configuration.setAllowedMethods(List.of("GET"));
+		// 		return configuration;
+		// 	};
+		// 	cors.configurationSource(source);
+		// });
 
 		http.logout(logout -> logout.logoutSuccessUrl("/"));
 
